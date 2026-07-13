@@ -18,7 +18,8 @@ from app.services.websocket_manager import connection_manager
 
 logger = get_logger(__name__)
 
-_TIMEFRAME_SCAN_SECONDS = {"M1": 30, "M5": 60, "M15": 180, "H1": 300}
+_TIMEFRAME_SCAN_SECONDS = {"M1": 60, "M5": 120, "M15": 300, "H1": 600}
+
 _OPERATION_MONITOR_SECONDS = 60
 
 scheduler = AsyncIOScheduler()
@@ -45,7 +46,7 @@ async def _scan_timeframe(timeframe: str) -> None:
             logger.exception("Erro durante o scan de %s", timeframe)
 
 
-async def _monitor_open_operations() -> None:
+a sync def _monitor_open_operations() -> None:
     """
     Verifica as operações que o usuário confirmou ter aberto e fecha
     automaticamente as que já bateram Take Profit ou Stop Loss, com base no
