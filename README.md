@@ -1,0 +1,1 @@
+# Sinais-Forex-v2
