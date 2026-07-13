@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Forex Radar AI — Painel de Sinais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="sweep-wrap" aria-hidden="true">
+    <div class="sweep"></div>
+  </div>
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">◎</span>
+      <div>
+        <div class="brand-name">FOREX RADAR <span class="accent">AI</span></div>
+        <div class="brand-sub">Scanner de Day Trade — IQS Engine</div>
+      </div>
+    </div>
+    <div class="topbar-status">
+      <div class="status-pill" id="ws-status">
+        <span class="dot"></span> Conectando...
+      </div>
+      <div class="status-pill" id="market-status">
+        <span class="dot"></span> Mercado
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </div>
+</header>
+
+<main class="container-fluid main-grid">
+
+  <section class="kpi-row" id="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">Win Rate</div>
+      <div class="kpi-value mono" id="kpi-winrate">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Profit Factor</div>
+      <div class="kpi-value mono" id="kpi-pf">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Expectancy</div>
+      <div class="kpi-value mono" id="kpi-expectancy">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Drawdown Máx.</div>
+      <div class="kpi-value mono" id="kpi-drawdown">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Resultado Líquido</div>
+      <div class="kpi-value mono" id="kpi-net">—</div>
+    </div>
+  </section>
+
+  <div class="row g-3 content-row">
+
+    <div class="col-lg-8">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Sinais Ativos</h2>
+          <span class="panel-hint">IQS ≥ 90 confirmado · 80–89 preparando</span>
+        </div>
+        <div class="signal-cards" id="signal-cards">
+          <div class="empty-state">Aguardando sinais do scanner…</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Heatmap de Pares</h2>
+          <span class="panel-hint">Força relativa por IQS</span>
+        </div>
+        <div class="heatmap" id="heatmap"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Última Leitura por Par</h2>
+          <span class="panel-hint">Todos os pares, inclusive descartados</span>
+        </div>
+        <div class="table-wrap">
+          <table class="ops-table">
+            <thead>
+              <tr>
+                <th>Par</th><th>TF</th><th>Direção</th><th>IQS</th>
+                <th>Status</th><th>Motivo</th><th>Atualizado</th>
+              </tr>
+            </thead>
+            <tbody id="scan-table-body">
+              <tr><td colspan="7" class="empty-row">Aguardando primeiro scan…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Backtest</h2>
+          <span class="panel-hint">Performance real do IQS no histórico</span>
+        </div>
+
+        <form id="backtest-form" class="backtest-form">
+          <div class="backtest-field backtest-field-wide">
+            <label>Pares</label>
+            <div class="backtest-pairs" id="bt-pairs"></div>
+          </div>
+          <div class="backtest-field">
+            <label for="bt-timeframe">Timeframe</label>
+            <select id="bt-timeframe">
+              <option value="M15">M15</option>
+              <option value="H1">H1</option>
+              <option value="M5">M5</option>
+              <option value="M1">M1</option>
+            </select>
+          </div>
+          <div class="backtest-field">
+            <label for="bt-preset">Período</label>
+            <select id="bt-preset">
+              <option value="7">Última semana</option>
+              <option value="30" selected>Último mês</option>
+              <option value="90">Últimos 3 meses</option>
+              <option value="180">Últimos 6 meses</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </div>
+          <div class="backtest-field" id="bt-start-field" style="display:none;">
+            <label for="bt-start">Início</label>
+            <input type="date" id="bt-start" />
+          </div>
+          <div class="backtest-field" id="bt-end-field" style="display:none;">
+            <label for="bt-end">Fim</label>
+            <input type="date" id="bt-end" />
+          </div>
+          <div class="backtest-field">
+            <label for="bt-capital">Capital inicial (USD)</label>
+            <input type="number" id="bt-capital" value="10000" min="100" step="100" />
+          </div>
+          <button type="submit" class="backtest-run-btn">Executar Backtest</button>
+        </form>
+
+        <div id="backtest-status" class="backtest-status"></div>
+
+        <div id="backtest-summary-wrap" class="backtest-summary-wrap" style="display:none;">
+          <div class="table-wrap">
+            <table class="ops-table">
+              <thead>
+                <tr>
+                  <th>Par</th><th>Avaliados</th><th>Operações</th><th>Win Rate</th>
+                  <th>Profit Factor</th><th>Resultado</th><th>Drawdown</th>
+                </tr>
+              </thead>
+              <tbody id="backtest-summary-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="backtest-results" class="backtest-results" style="display:none;">
+          <div class="panel-header" style="margin-top:8px;">
+            <h2 id="backtest-detail-title" style="font-size:13px;">Detalhe</h2>
+          </div>
+          <div class="kpi-row" id="backtest-kpi-row"></div>
+          <canvas id="backtest-chart" height="180"></canvas>
+          <div class="table-wrap">
+            <table class="ops-table">
+              <thead>
+                <tr>
+                  <th>Direção</th><th>Entrada</th><th>Saída</th><th>Resultado</th>
+                  <th>P/L</th><th>IQS</th><th>Aberta em</th>
+                </tr>
+              </thead>
+              <tbody id="backtest-trades-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Últimas Operações</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="ops-table">
+            <thead>
+              <tr>
+                <th>Par</th><th>Direção</th><th>Entrada</th><th>Saída</th>
+                <th>Resultado</th><th>P/L</th><th>Aberta em</th>
+              </tr>
+            </thead>
+            <tbody id="ops-table-body">
+              <tr><td colspan="7" class="empty-row">Sem operações registradas ainda.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Curva de Capital</h2>
+        </div>
+        <canvas id="capital-chart" height="220"></canvas>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Sobre o IQS</h2>
+        </div>
+        <div class="iqs-legend">
+          <div class="iqs-legend-row"><span>Trend</span><span class="mono">25</span></div>
+          <div class="iqs-legend-row"><span>Pullback</span><span class="mono">20</span></div>
+          <div class="iqs-legend-row"><span>Momentum</span><span class="mono">15</span></div>
+          <div class="iqs-legend-row"><span>Volatilidade</span><span class="mono">15</span></div>
+          <div class="iqs-legend-row"><span>ADX</span><span class="mono">10</span></div>
+          <div class="iqs-legend-row"><span>Liquidez</span><span class="mono">10</span></div>
+          <div class="iqs-legend-row"><span>Sessão</span><span class="mono">5</span></div>
+        </div>
+      </section>
+    </div>
+
+  </div>
+</main>
+
+<footer class="footer">
+  Forex Radar AI — Painel em tempo real via WebSocket · Estatísticas refletem apenas operações que você confirmou com "Marcar como Operado", monitoradas via preço real de mercado · Nenhum dado aqui constitui aconselhamento financeiro.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="static/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+backend/logs/
+# NOTA: .env NÃO está ignorado de propósito neste projeto — contém apenas
+# credenciais de desenvolvimento (Postgres/Redis locais, sem custo, sem
+# segredo real) para permitir "docker compose up" funcionar imediatamente em
+# GitHub Codespaces sem passos manuais. Em produção, use .env real fora do
+# controle de versão e configure SECRET_KEY / Telegram / API keys reais.
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.venv/
+venv/
+node_modules/

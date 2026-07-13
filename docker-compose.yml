@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: forex_radar_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-forexradar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forexradar_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-forex_radar_ai}
+    ports:
+      - "5432:5432"
+    volumes:
+      - forex_radar_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-forexradar}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - forex_radar_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: forex_radar_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - forex_radar_net
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: forex_radar_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    networks:
+      - forex_radar_net
+
+  frontend:
+    image: nginx:1.27-alpine
+    container_name: forex_radar_frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - forex_radar_net
+
+networks:
+  forex_radar_net:
+    driver: bridge
+
+volumes:
+  forex_radar_db_data:
