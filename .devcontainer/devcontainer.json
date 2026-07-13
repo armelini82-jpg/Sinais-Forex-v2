@@ -1,12 +1,24 @@
 {
   "name": "Forex Radar AI",
-  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.override.yml"],
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "docker-compose.override.yml"
+  ],
   "service": "api",
-  "runServices": ["db", "redis", "api", "frontend"],
+  "runServices": [
+    "db",
+    "redis",
+    "api",
+    "frontend"
+  ],
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
-
-  "forwardPorts": [8080, 8000, 5432, 6379],
+  "forwardPorts": [
+    8080,
+    8000,
+    5432,
+    6379
+  ],
   "portsAttributes": {
     "8080": {
       "label": "Dashboard (Frontend)",
@@ -17,15 +29,19 @@
       "onAutoForward": "notify"
     }
   },
-
   "postCreateCommand": "echo 'Forex Radar AI pronto. Dashboard: porta 8080 | API/Swagger: porta 8000'",
-
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance"
       ]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
     }
   }
 }
